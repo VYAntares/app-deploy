@@ -1,4 +1,4 @@
-# Client Template — Guide complet
+# App Template — Guide complet
 
 Template de déploiement pour un site client sur VPS Ubuntu avec Docker.  
 Conçu pour être **éducatif** : chaque décision d'architecture est expliquée.
