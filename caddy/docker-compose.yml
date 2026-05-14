@@ -1,0 +1,26 @@
+services:
+
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - caddy_data:/data        # certificats SSL persistants
+      - caddy_config:/config
+    networks:
+      - web
+    restart: always
+    labels:
+      caddy.email: contact@vyantares.ch
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  web:
+    external: true

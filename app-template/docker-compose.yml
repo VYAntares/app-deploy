@@ -1,0 +1,175 @@
+# ============================================================
+# DOCKER COMPOSE — CLIENT TEMPLATE
+# ============================================================
+#
+# ARCHITECTURE GLOBALE :
+#
+#   Internet
+#      │
+#   Caddy  (:80/:443)   ← seul container qui touche aux ports publics
+#      │                   gère SSL automatiquement (Let's Encrypt)
+#      │  réseau "web" (Docker externe, partagé avec tous les projets)
+#      │
+#   nginx  (:80)        ← sert le frontend statique
+#      │                   proxy /api/* vers backend
+#      │  réseau "internal" (privé, invisible depuis internet)
+#      │
+#   backend (:PORT)     ← API Node.js
+#      │
+#   postgres (:5432)    ← base de données, jamais exposée
+#
+#   adminer (:8080)     ← interface web pour gérer postgres
+#                          accessible via adminer.CLIENT_DOMAIN
+#
+# RÈGLE IMPORTANTE :
+#   Aucun container (sauf Caddy) n'expose de port sur l'hôte.
+#   Tout passe par les réseaux Docker internes.
+#   Caddy détecte les labels et configure le routing automatiquement.
+#
+# AVANT DE LANCER :
+#   1. Remplacer CLIENT_DOMAIN par le vrai domaine (ex: dupont.ch)
+#   2. Créer un fichier .env (voir section "Variables d'environnement")
+#   3. S'assurer que le réseau "web" existe : docker network create web
+#   4. docker compose up -d
+#
+# VARIABLES D'ENVIRONNEMENT (.env) :
+#   NODE_ENV=production
+#   JWT_SECRET=une-chaine-aleatoire-longue
+#   PORT=3000
+#   POSTGRES_DB=nom_base
+#   POSTGRES_USER=nom_utilisateur
+#   POSTGRES_PASSWORD=mot_de_passe_fort
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # NGINX — Serveur web frontend
+  # ----------------------------------------------------------
+  # Rôle : sert les fichiers statiques du frontend (HTML/CSS/JS)
+  # et peut proxifier certaines routes vers le backend.
+  #
+  # Il n'expose AUCUN port sur l'hôte — Caddy s'en charge.
+  # Caddy communique avec lui via le réseau "web" sur le port 80.
+  # ----------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    volumes:
+      # Ta config nginx sur le VPS → dans le container
+      # Modifie ce fichier pour changer le comportement de nginx
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      # Ton dossier frontend/ → nginx sert ces fichiers statiques
+      # Modifier les fichiers ici = visible immédiatement sans rebuild
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - backend         # nginx démarre seulement après backend
+    restart: always
+    networks:
+      - web             # accessible par Caddy
+      - internal        # peut parler au backend
+    labels:
+      # Caddy lit ces labels et configure le routing automatiquement.
+      # Remplacer CLIENT_DOMAIN par le vrai domaine.
+      caddy: CLIENT_DOMAIN
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      # Redirige www → racine (ex: www.dupont.ch → dupont.ch)
+      caddy_1: www.CLIENT_DOMAIN
+      caddy_1.redir: "https://CLIENT_DOMAIN{uri} permanent"
+
+  # ----------------------------------------------------------
+  # BACKEND — API Node.js
+  # ----------------------------------------------------------
+  # Rôle : logique métier, authentification, accès à la base.
+  #
+  # Pas de label Caddy ici — nginx proxifie vers lui en interne.
+  # Pas de port exposé — uniquement accessible via réseau "internal".
+  # ----------------------------------------------------------
+  backend:
+    build: ./backend    # construit l'image depuis ./backend/Dockerfile
+    env_file: .env      # charge toutes les variables depuis .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    networks:
+      - internal        # parle à nginx et postgres, jamais à internet
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ----------------------------------------------------------
+  # POSTGRES — Base de données
+  # ----------------------------------------------------------
+  # Rôle : stockage persistant des données.
+  #
+  # N'est JAMAIS accessible depuis internet ni depuis Caddy.
+  # Uniquement joignable par backend (même réseau "internal").
+  #
+  # DONNÉES PERSISTANTES :
+  #   Stockées dans un volume Docker nommé "postgres_data".
+  #   Emplacement sur le VPS :
+  #     /mnt/data/docker/volumes/NOM-PROJET_postgres_data/_data/
+  #   Supprimer le container ne supprime PAS les données.
+  #   Pour tout effacer : docker volume rm NOM-PROJET_postgres_data
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env      # charge POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ----------------------------------------------------------
+  # ADMINER — Interface web pour gérer Postgres
+  # ----------------------------------------------------------
+  # Rôle : accéder à la base de données via un navigateur.
+  # Accessible sur : https://adminer.CLIENT_DOMAIN
+  #
+  # ATTENTION : protège ce sous-domaine si le projet est sensible.
+  # Tu peux le commenter en production et le réactiver si besoin.
+  # ----------------------------------------------------------
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - web             # accessible par Caddy
+      - internal        # peut parler à postgres
+    labels:
+      caddy: adminer.CLIENT_DOMAIN
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+
+# ============================================================
+# RÉSEAUX
+# ============================================================
+networks:
+  web:
+    external: true
+    # Réseau partagé entre Caddy et tous les projets.
+    # Créé une seule fois sur le VPS : docker network create web
+    # "external: true" = Docker Compose ne le crée pas, il l'utilise.
+
+  internal:
+    driver: bridge
+    # Réseau privé à ce projet uniquement.
+    # Créé automatiquement par Docker Compose au premier "up".
+    # Invisible depuis internet et depuis Caddy.
+
+# ============================================================
+# VOLUMES
+# ============================================================
+volumes:
+  postgres_data:
+    # Déclaration obligatoire pour les volumes nommés utilisés plus haut.
+    # Docker crée et gère ce volume automatiquement.
+    # Les données survivent aux restarts et suppressions de containers.

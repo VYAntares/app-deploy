@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>502 — VYAntares</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f9f8f5; color: #111; min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 2rem 3rem; display: flex; align-items: flex-start; }
+    .wordmark { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.2em; text-transform: uppercase; color: #111; text-decoration: none; display: flex; flex-direction: column; gap: 3px; }
+    .wordmark-line { display: flex; align-items: center; gap: 0.4em; }
+    .wordmark-dot { color: #b08d57; }
+    .wordmark-rule { width: 100%; height: 1px; background: linear-gradient(to right, #b08d57, transparent); }
+    .wordmark-tagline { font-family: 'Inter', sans-serif; font-size: 0.55rem; font-weight: 300; letter-spacing: 0.3em; text-transform: uppercase; color: #aaa; }
+    .ghost { position: fixed; font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 42vw; color: rgba(0,0,0,0.04); top: 50%; left: 50%; transform: translate(-50%,-50%); user-select: none; pointer-events: none; line-height: 1; letter-spacing: -0.05em; }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 3rem 6rem; }
+    .content { position: relative; text-align: center; max-width: 420px; }
+    .error-label { font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.35em; text-transform: uppercase; color: #b08d57; margin-bottom: 1.25rem; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 2.4rem; line-height: 1.2; color: #111; margin-bottom: 1rem; font-style: italic; }
+    .divider { width: 32px; height: 1px; background: #b08d57; margin: 0 auto 1.25rem; }
+    p { font-size: 0.875rem; font-weight: 300; color: #666; line-height: 1.75; margin-bottom: 2.5rem; }
+    a { display: inline-block; padding: 0.65rem 1.75rem; border: 1px solid #111; color: #111; text-decoration: none; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.2s, color 0.2s; }
+    a:hover { background: #111; color: #f9f8f5; }
+    footer { padding: 1.5rem 3rem; text-align: center; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: #ccc; }
+  </style>
+</head>
+<body>
+
+  <div class="ghost">502</div>
+
+  <header>
+    <a href="/" class="wordmark">
+      <div class="wordmark-line">
+        <span>VY</span>
+        <span class="wordmark-dot">·</span>
+        <span>Antares</span>
+      </div>
+      <div class="wordmark-rule"></div>
+      <span class="wordmark-tagline">Solutions Online</span>
+    </a>
+  </header>
+
+  <main>
+    <div class="content">
+      <div class="error-label">Erreur 502</div>
+      <h1>Service indisponible</h1>
+      <div class="divider"></div>
+      <p>Le serveur est en cours de redémarrage.<br>Veuillez réessayer dans quelques instants.</p>
+      <a href="/">Réessayer</a>
+    </div>
+  </main>
+
+  <footer>© VYAntares — Solutions Online</footer>
+
+</body>
+</html>

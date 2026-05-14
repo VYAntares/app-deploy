@@ -1,0 +1,33 @@
+# Sites déployés — secrets et données
+apps/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Fichiers home Linux
+.bash_history
+.bash_logout
+.bashrc
+.profile
+.claude
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime
+*.pid
+*.seed
+
+# Build output
+dist/
+build/

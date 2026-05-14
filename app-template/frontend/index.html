@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Site</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Bienvenue</h1>
+      <nav id="nav-auth">
+        <button id="btn-show-login">Connexion</button>
+        <button id="btn-show-register">Inscription</button>
+        <button id="btn-logout" class="hidden">Déconnexion</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="section-login" class="hidden">
+        <h2>Connexion</h2>
+        <form id="form-login">
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Mot de passe" required />
+          <button type="submit">Se connecter</button>
+        </form>
+        <p id="msg-login" class="msg"></p>
+      </section>
+
+      <section id="section-register" class="hidden">
+        <h2>Inscription</h2>
+        <form id="form-register">
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Mot de passe (8+ caractères)" required />
+          <button type="submit">Créer un compte</button>
+        </form>
+        <p id="msg-register" class="msg"></p>
+      </section>
+
+      <section id="section-home">
+        <p id="status-db">Vérification de l'API...</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
