@@ -24,16 +24,14 @@ sed -i "s/CLIENT_NAME/${CLIENT_NAME}/g" "$ROOT_DIR/docker-compose.yml"
 
 echo "→ Generating .env..."
 JWT_SECRET="$(openssl rand -hex 32)"
-POSTGRES_PASSWORD="$(openssl rand -hex 16)"
+DB_PASSWORD="$(openssl rand -hex 16)"
 
-sed \
-  -e "s/GENERATED/${JWT_SECRET}/" \
-  -e "s/GENERATED/${POSTGRES_PASSWORD}/" \
-  -e "s/CLIENT_NAME/${CLIENT_NAME}/g" \
-  "$ROOT_DIR/.env.example" > "$ROOT_DIR/.env"
+cp "$ROOT_DIR/.env.example" "$ROOT_DIR/.env"
+sed -i "s|__JWT_SECRET__|${JWT_SECRET}|g" "$ROOT_DIR/.env"
+sed -i "s|__DB_PASSWORD__|${DB_PASSWORD}|g" "$ROOT_DIR/.env"
+sed -i "s/CLIENT_NAME/${CLIENT_NAME}/g" "$ROOT_DIR/.env"
 
-# DATABASE_URL has CLIENT_NAME already replaced but GENERATED still present — fix it
-sed -i "s|postgresql://${CLIENT_NAME}:GENERATED@|postgresql://${CLIENT_NAME}:${POSTGRES_PASSWORD}@|g" "$ROOT_DIR/.env"
+chmod 600 "$ROOT_DIR/.env"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -45,4 +43,4 @@ echo "  .env   : ${ROOT_DIR}/.env"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Next step:"
-echo "  cd $(basename "$ROOT_DIR") && docker compose up -d"
+echo "  cd ${ROOT_DIR} && docker compose up -d"

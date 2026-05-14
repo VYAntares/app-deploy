@@ -44,7 +44,7 @@ docker volume ls -q | xargs -I{} docker volume inspect {} --format '{{.Name}} �
 ## Supprimer un projet complet (ex: test)
 
 ```bash
-cd /home/antares/deploy/test
+cd /home/antares/app-deploy/apps/test
 
 # 1. Arrêter et supprimer les containers + réseau interne
 docker compose down
@@ -56,7 +56,7 @@ docker compose down -v
 docker rmi test-backend
 
 # 4. Supprimer les fichiers du projet
-rm -rf /home/antares/deploy/test
+rm -rf /home/antares/app-deploy/apps/test
 ```
 
 ---
@@ -104,5 +104,5 @@ ls /var/lib/docker/volumes/   # → vide
 | Données Docker (tout) | `/var/lib/docker/` |
 | Volumes nommés (DB) | `/var/lib/docker/volumes/` |
 | Images | `/var/lib/docker/image/` |
-| Fichiers projet | `/home/antares/deploy/<client>/` |
+| Fichiers projet | `/home/antares/app-deploy/apps/<client>/` |
 | Certificats Caddy | Dans le volume du container Caddy |
